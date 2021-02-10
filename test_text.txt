@@ -1,0 +1,173 @@
+The Rust Programming Language
+Foreword
+Introduction
+1. Getting Started
+1.1. Installation
+1.2. Hello, World!
+1.3. Hello, Cargo!
+2. Programming a Guessing Game
+3. Common Programming Concepts
+3.1. Variables and Mutability
+3.2. Data Types
+3.3. Functions
+3.4. Comments
+3.5. Control Flow
+4. Understanding Ownership
+4.1. What is Ownership?
+4.2. References and Borrowing
+4.3. The Slice Type
+5. Using Structs to Structure Related Data
+5.1. Defining and Instantiating Structs
+5.2. An Example Program Using Structs
+5.3. Method Syntax
+6. Enums and Pattern Matching
+6.1. Defining an Enum
+6.2. The match Control Flow Operator
+6.3. Concise Control Flow with if let
+7. Managing Growing Projects with Packages, Crates, and Modules
+7.1. Packages and Crates
+7.2. Defining Modules to Control Scope and Privacy
+7.3. Paths for Referring to an Item in the Module Tree
+7.4. Bringing Paths Into Scope with the use Keyword
+7.5. Separating Modules into Different Files
+8. Common Collections
+8.1. Storing Lists of Values with Vectors
+8.2. Storing UTF-8 Encoded Text with Strings
+8.3. Storing Keys with Associated Values in Hash Maps
+9. Error Handling
+9.1. Unrecoverable Errors with panic!
+9.2. Recoverable Errors with Result
+9.3. To panic! or Not To panic!
+10. Generic Types, Traits, and Lifetimes
+10.1. Generic Data Types
+10.2. Traits: Defining Shared Behavior
+10.3. Validating References with Lifetimes
+11. Writing Automated Tests
+11.1. How to Write Tests
+11.2. Controlling How Tests Are Run
+11.3. Test Organization
+12. An I/O Project: Building a Command Line Program
+12.1. Accepting Command Line Arguments
+12.2. Reading a File
+12.3. Refactoring to Improve Modularity and Error Handling
+12.4. Developing the Library’s Functionality with Test Driven Development
+12.5. Working with Environment Variables
+12.6. Writing Error Messages to Standard Error Instead of Standard Output
+13. Functional Language Features: Iterators and Closures
+13.1. Closures: Anonymous Functions that Can Capture Their Environment
+13.2. Processing a Series of Items with Iterators
+13.3. Improving Our I/O Project
+13.4. Comparing Performance: Loops vs. Iterators
+14. More about Cargo and Crates.io
+14.1. Customizing Builds with Release Profiles
+14.2. Publishing a Crate to Crates.io
+14.3. Cargo Workspaces
+14.4. Installing Binaries from Crates.io with cargo install
+14.5. Extending Cargo with Custom Commands
+15. Smart Pointers
+15.1. Using Box to Point to Data on the Heap
+15.2. Treating Smart Pointers Like Regular References with the Deref Trait
+15.3. Running Code on Cleanup with the Drop Trait
+15.4. Rc, the Reference Counted Smart Pointer
+15.5. RefCell and the Interior Mutability Pattern
+15.6. Reference Cycles Can Leak Memory
+16. Fearless Concurrency
+16.1. Using Threads to Run Code Simultaneously
+16.2. Using Message Passing to Transfer Data Between Threads
+16.3. Shared-State Concurrency
+16.4. Extensible Concurrency with the Sync and Send Traits
+17. Object Oriented Programming Features of Rust
+17.1. Characteristics of Object-Oriented Languages
+17.2. Using Trait Objects That Allow for Values of Different Types
+17.3. Implementing an Object-Oriented Design Pattern
+18. Patterns and Matching
+18.1. All the Places Patterns Can Be Used
+18.2. Refutability: Whether a Pattern Might Fail to Match
+18.3. Pattern Syntax
+19. Advanced Features
+19.1. Unsafe Rust
+19.2. Advanced Traits
+19.3. Advanced Types
+19.4. Advanced Functions and Closures
+19.5. Macros
+20. Final Project: Building a Multithreaded Web Server
+20.1. Building a Single-Threaded Web Server
+20.2. Turning Our Single-Threaded Server into a Multithreaded Server
+20.3. Graceful Shutdown and Cleanup
+21. Appendix
+21.1. A - Keywords
+21.2. B - Operators and Symbols
+21.3. C - Derivable Traits
+21.4. D - Useful Development Tools
+21.5. E - Editions
+21.6. F - Translations of the Book
+21.7. G - How Rust is Made and “Nightly Rust”
+
+
+
+The Rust Programming Language
+ 
+Reading a File
+Now we’ll add functionality to read the file that is specified in the filename command line argument. First, we need a sample file to test it with: the best kind of file to use to make sure minigrep is working is one with a small amount of text over multiple lines with some repeated words. Listing 12-3 has an Emily Dickinson poem that will work well! Create a file called poem.txt at the root level of your project, and enter the poem “I’m Nobody! Who are you?”
+
+Filename: poem.txt
+
+
+I’m nobody! Who are you?
+Are you nobody, too?
+Then there’s a pair of us - don’t tell!
+They’d banish us, you know.
+
+How dreary to be somebody!
+How public, like a frog
+To tell your name the livelong day
+To an admiring bog!
+Listing 12-3: A poem by Emily Dickinson makes a good test case
+
+With the text in place, edit src/main.rs and add code to read the file, as shown in Listing 12-4.
+
+Filename: src/main.rs
+
+
+use std::env;
+use std::fs;
+
+fn main() {
+    // --snip--
+    println!("In file {}", filename);
+
+    let contents = fs::read_to_string(filename)
+        .expect("Something went wrong reading the file");
+
+    println!("With text:\n{}", contents);
+}
+Listing 12-4: Reading the contents of the file specified by the second argument
+
+First, we add another use statement to bring in a relevant part of the standard library: we need std::fs to handle files.
+
+In main, we’ve added a new statement: fs::read_to_string takes the filename, opens that file, and returns a Result<String> of the file’s contents.
+
+After that statement, we’ve again added a temporary println! statement that prints the value of contents after the file is read, so we can check that the program is working so far.
+
+Let’s run this code with any string as the first command line argument (because we haven’t implemented the searching part yet) and the poem.txt file as the second argument:
+
+
+$ cargo run the poem.txt
+   Compiling minigrep v0.1.0 (file:///projects/minigrep)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.0s
+     Running `target/debug/minigrep the poem.txt`
+Searching for the
+In file poem.txt
+With text:
+I’m nobody! Who are you?
+Are you nobody, too?
+Then there’s a pair of us - don’t tell!
+They’d banish us, you know.
+
+How dreary to be somebody!
+How public, like a frog
+To tell your name the livelong day
+To an admiring bog!
+
+Great! The code read and then printed the contents of the file. But the code has a few flaws. The main function has multiple responsibilities: generally, functions are clearer and easier to maintain if each function is responsible for only one idea. The other problem is that we’re not handling errors as well as we could. The program is still small, so these flaws aren’t a big problem, but as the program grows, it will be harder to fix them cleanly. It’s good practice to begin refactoring early on when developing a program, because it’s much easier to refactor smaller amounts of code. We’ll do that next.
+
